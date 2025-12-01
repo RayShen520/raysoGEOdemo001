@@ -1277,39 +1277,39 @@ def open_website(url: str = "https://www.baidu.com", use_profile: bool = True, t
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
         
-        # 查找 Chrome 的实际安装位置
-        chrome_binary_paths = [
-            "/usr/bin/google-chrome",
-            "/usr/bin/google-chrome-stable",
-            "/usr/bin/chromium-browser",
-            "/opt/google/chrome/chrome",
-            "/usr/bin/chromium"
-        ]
+        # 查找 Chrome 的实际安装位置（优先使用 which 命令）
+        import shutil
+        chrome_binary = shutil.which("google-chrome") or shutil.which("google-chrome-stable") or shutil.which("chromium-browser")
         
-        chrome_binary = None
-        for path in chrome_binary_paths:
-            if os.path.exists(path) and os.access(path, os.X_OK):
-                chrome_binary = path
-                break
+        if not chrome_binary:
+            # 如果 which 找不到，尝试常见路径
+            chrome_binary_paths = [
+                "/usr/bin/google-chrome",
+                "/usr/bin/google-chrome-stable",
+                "/usr/bin/chromium-browser",
+                "/opt/google/chrome/chrome",
+                "/usr/bin/chromium"
+            ]
+            
+            for path in chrome_binary_paths:
+                if os.path.exists(path) and os.access(path, os.X_OK):
+                    chrome_binary = path
+                    break
         
         if chrome_binary:
             # 如果是符号链接，获取实际路径
             if os.path.islink(chrome_binary):
                 chrome_binary = os.path.realpath(chrome_binary)
-            chrome_options.binary_location = chrome_binary
-            print(f"找到 Chrome: {chrome_binary}")
-        else:
-            # 尝试使用 which 命令查找
-            import shutil
-            chrome_binary = shutil.which("google-chrome") or shutil.which("google-chrome-stable") or shutil.which("chromium-browser")
-            if chrome_binary:
-                # 如果是符号链接，获取实际路径
-                if os.path.islink(chrome_binary):
-                    chrome_binary = os.path.realpath(chrome_binary)
+            # 再次检查路径是否存在
+            if os.path.exists(chrome_binary) and os.access(chrome_binary, os.X_OK):
                 chrome_options.binary_location = chrome_binary
                 print(f"找到 Chrome: {chrome_binary}")
             else:
-                print("警告: 未找到 Chrome，尝试使用默认路径...")
+                print(f"警告: Chrome 路径 {chrome_binary} 不存在或不可执行")
+                chrome_binary = None
+        
+        if not chrome_binary:
+            print("警告: 未找到 Chrome，尝试使用默认路径...")
         
         # 尝试使用 webdriver-manager 自动下载并配置 ChromeDriver
         print("正在初始化 Chrome 浏览器...")
