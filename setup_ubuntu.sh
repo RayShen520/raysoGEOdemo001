@@ -14,9 +14,9 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-# 配置（请修改为你的信息）
-GITHUB_USER="YOUR_USERNAME"  # 替换为你的 GitHub 用户名
-REPO_NAME="demo010"          # 替换为你的仓库名（如果不同）
+# 配置
+GITHUB_USER="RayShen520"     # GitHub 用户名
+REPO_NAME="raysoGEOdemo001"  # 仓库名
 
 echo -e "${YELLOW}提示：请先修改脚本中的 GITHUB_USER 和 REPO_NAME${NC}"
 echo ""
