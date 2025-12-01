@@ -1284,9 +1284,12 @@ def open_website(url: str = "https://www.baidu.com", use_profile: bool = True, t
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=chrome_options)
             print("使用 webdriver-manager 初始化成功")
-        except ImportError:
-            # 如果 webdriver-manager 不可用，使用系统 PATH 中的 chromedriver
-            print("webdriver-manager 不可用，尝试使用系统 PATH 中的 ChromeDriver...")
+        except (ImportError, Exception) as e:
+            # 如果 webdriver-manager 不可用或下载失败，使用系统 PATH 中的 chromedriver
+            if isinstance(e, ImportError):
+                print("webdriver-manager 不可用，尝试使用系统 PATH 中的 ChromeDriver...")
+            else:
+                print(f"webdriver-manager 下载失败 ({str(e)[:50]}...)，尝试使用系统 PATH 中的 ChromeDriver...")
             driver = webdriver.Chrome(options=chrome_options)
             print("使用系统 ChromeDriver 初始化成功")
         
