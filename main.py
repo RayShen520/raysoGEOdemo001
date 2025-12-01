@@ -1293,6 +1293,9 @@ def open_website(url: str = "https://www.baidu.com", use_profile: bool = True, t
                 break
         
         if chrome_binary:
+            # 如果是符号链接，获取实际路径
+            if os.path.islink(chrome_binary):
+                chrome_binary = os.path.realpath(chrome_binary)
             chrome_options.binary_location = chrome_binary
             print(f"找到 Chrome: {chrome_binary}")
         else:
@@ -1300,6 +1303,9 @@ def open_website(url: str = "https://www.baidu.com", use_profile: bool = True, t
             import shutil
             chrome_binary = shutil.which("google-chrome") or shutil.which("google-chrome-stable") or shutil.which("chromium-browser")
             if chrome_binary:
+                # 如果是符号链接，获取实际路径
+                if os.path.islink(chrome_binary):
+                    chrome_binary = os.path.realpath(chrome_binary)
                 chrome_options.binary_location = chrome_binary
                 print(f"找到 Chrome: {chrome_binary}")
             else:
