@@ -1303,15 +1303,19 @@ def open_website(url: str = "https://www.baidu.com", use_profile: bool = True, t
                     break
         
         if chrome_binary:
-            # 如果是符号链接，获取实际路径
-            if os.path.islink(chrome_binary):
-                chrome_binary = os.path.realpath(chrome_binary)
-            # 再次检查路径是否存在且可执行
+            # 获取实际路径（处理符号链接）
+            original_path = chrome_binary
+            chrome_binary = os.path.realpath(chrome_binary)
+            
+            # 验证实际路径是否存在且可执行
             if os.path.exists(chrome_binary) and os.access(chrome_binary, os.X_OK):
                 chrome_options.binary_location = chrome_binary
-                print(f"找到 Chrome: {chrome_binary}")
+                if original_path != chrome_binary:
+                    print(f"找到 Chrome: {original_path} -> {chrome_binary}")
+                else:
+                    print(f"找到 Chrome: {chrome_binary}")
             else:
-                print(f"警告: Chrome 路径 {chrome_binary} 不存在或不可执行，尝试使用默认路径...")
+                print(f"警告: Chrome 路径 {chrome_binary} 不存在或不可执行（原始路径: {original_path}），尝试使用默认路径...")
                 chrome_binary = None
         
         if not chrome_binary:
