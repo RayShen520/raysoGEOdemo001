@@ -1279,15 +1279,21 @@ def open_website(url: str = "https://www.baidu.com", use_profile: bool = True, t
         
         # 查找 Chrome 的实际安装位置（优先使用 which 命令）
         import shutil
-        chrome_binary = shutil.which("google-chrome") or shutil.which("google-chrome-stable") or shutil.which("chromium-browser")
+        chrome_binary = None
         
+        # 首先尝试 which 命令（最可靠）
+        for cmd in ["google-chrome", "google-chrome-stable", "chromium-browser", "chromium"]:
+            chrome_binary = shutil.which(cmd)
+            if chrome_binary:
+                break
+        
+        # 如果 which 找不到，尝试常见路径（但必须验证存在）
         if not chrome_binary:
-            # 如果 which 找不到，尝试常见路径
             chrome_binary_paths = [
                 "/usr/bin/google-chrome",
                 "/usr/bin/google-chrome-stable",
                 "/usr/bin/chromium-browser",
-                "/opt/google/chrome/chrome",
+                "/opt/google/chrome/google-chrome",  # 注意：是 google-chrome 不是 chrome
                 "/usr/bin/chromium"
             ]
             
@@ -1300,12 +1306,12 @@ def open_website(url: str = "https://www.baidu.com", use_profile: bool = True, t
             # 如果是符号链接，获取实际路径
             if os.path.islink(chrome_binary):
                 chrome_binary = os.path.realpath(chrome_binary)
-            # 再次检查路径是否存在
+            # 再次检查路径是否存在且可执行
             if os.path.exists(chrome_binary) and os.access(chrome_binary, os.X_OK):
                 chrome_options.binary_location = chrome_binary
                 print(f"找到 Chrome: {chrome_binary}")
             else:
-                print(f"警告: Chrome 路径 {chrome_binary} 不存在或不可执行")
+                print(f"警告: Chrome 路径 {chrome_binary} 不存在或不可执行，尝试使用默认路径...")
                 chrome_binary = None
         
         if not chrome_binary:
