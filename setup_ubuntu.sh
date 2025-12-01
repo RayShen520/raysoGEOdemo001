@@ -96,8 +96,35 @@ echo ""
 # 6. 安装 Python 依赖
 echo -e "${YELLOW}[6/6] 安装 Python 依赖...${NC}"
 if [ -f "requirements.txt" ]; then
-    pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-    echo -e "${GREEN}✓ Python 依赖已安装${NC}"
+    # 尝试多个镜像源
+    MIRRORS=(
+        "https://pypi.org/simple"                    # 官方源
+        "https://mirrors.aliyun.com/pypi/simple"     # 阿里云
+        "https://pypi.tuna.tsinghua.edu.cn/simple"   # 清华
+        "https://pypi.douban.com/simple"             # 豆瓣
+    )
+    
+    INSTALLED=0
+    for mirror in "${MIRRORS[@]}"; do
+        echo "尝试使用镜像源: $mirror"
+        if pip3 install -r requirements.txt -i "$mirror" --trusted-host "$(echo $mirror | sed 's|https\?://||' | cut -d'/' -f1)" 2>/dev/null; then
+            echo -e "${GREEN}✓ Python 依赖已安装（使用镜像源: $mirror）${NC}"
+            INSTALLED=1
+            break
+        else
+            echo "镜像源 $mirror 失败，尝试下一个..."
+        fi
+    done
+    
+    if [ $INSTALLED -eq 0 ]; then
+        echo -e "${YELLOW}所有镜像源都失败，尝试使用默认源...${NC}"
+        pip3 install -r requirements.txt
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ Python 依赖已安装（使用默认源）${NC}"
+        else
+            echo -e "${RED}✗ Python 依赖安装失败，请检查网络连接${NC}"
+        fi
+    fi
 else
     echo -e "${RED}✗ 未找到 requirements.txt${NC}"
 fi
